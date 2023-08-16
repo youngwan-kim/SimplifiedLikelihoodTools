@@ -1,0 +1,26 @@
+name: CMSSW Environment Setup
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Pull CMSSW Docker image
+      run: docker pull cmssw/cmssw
+
+    - name: Set up environment and run jobs
+      run: |
+        docker run --name my_cmssw_container -it -v $PWD:/workspace cmssw/cmssw /bin/bash -c "
+          # Commands to run within the Docker container
+          source /opt/cms/cmsset_default.sh
+          cd /workspace
+          # Run your jobs here
+          "
+
+    - name: Cleanup
+      run: docker rm my_cmssw_container
