@@ -15,7 +15,7 @@ jobs:
 
     - name: Set up environment and run jobs
       run: |
-        docker run --name my_cmssw_container -it -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
+        docker run --name my_cmssw_container -i -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
           # Commands to run within the Docker container
           # source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh 
           source /opt/cms/cmsset_default.sh
