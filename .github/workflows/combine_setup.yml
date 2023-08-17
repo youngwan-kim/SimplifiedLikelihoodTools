@@ -22,6 +22,10 @@ jobs:
           cd /workspace
           # Run your jobs here
           "
+          cmsrel CMSSW_11_3_4
+          cd CMSSW_11_3_4/src
+          cmsenv
+          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit 
 
     - name: Cleanup
       run: docker rm my_cmssw_container
