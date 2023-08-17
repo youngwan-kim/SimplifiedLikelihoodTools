@@ -11,7 +11,12 @@ jobs:
 
     services:
       cvmfs:
-        image: cvmfs/service
+       image: cvmfs/service
+       env:
+          CVMFS_REPOSITORIES: "cms.cern.ch"
+          CVMFS_CLIENT_PROFILE: "single"
+       options: --volume /cvmfs:/cvmfs:shared --device /dev/fuse --cap-add SYS_ADMIN
+       
 
     steps:
       - name: Check cvmfs mount
