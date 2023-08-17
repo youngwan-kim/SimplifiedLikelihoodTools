@@ -3,8 +3,29 @@ name: CMSSW Environment Setup
 on: [push]
 
 jobs:
-  build:
+  cvmfs: 
     runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Pull CVMFS Docker image
+      run: docker pull cvmfs/service
+
+    - name: Set up CVMFS 
+      run: |
+        docker run -d --rm --name cmvfs_service \
+          -e CVMFS_CLIENT_PROFILE=single \
+          -e CVMFS_REPOSITORIES=sft.cern.ch,... \
+          --cap-add SYS_ADMIN \
+          --device /dev/fuse \
+          --volume /cvmfs:/cvmfs:shared \
+          cvmfs/service
+     
+  cmssw:
+    runs-on: ubuntu-latest
+    needs: cvmfs
     
     steps:
     - name: Checkout repository
@@ -12,10 +33,7 @@ jobs:
 
     - name: Pull CMSSW Docker image
       run: docker pull cmssw/cc7
-
-    - name: Set up CVMFS
-      uses: ./.github/workflows/cvmfs.yml
-
+      
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
         docker run --name my_cmssw_container -i -v /cvmfs:/workspace cmssw/cc7 /bin/bash -c "
