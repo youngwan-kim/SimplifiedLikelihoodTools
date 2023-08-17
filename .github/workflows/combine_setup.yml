@@ -13,19 +13,19 @@ jobs:
     - name: Pull CMSSW Docker image
       run: docker pull cmssw/cc7
 
-    - name: Set up environment and run jobs
+    - name: Set up CMSSW 
       run: |
         docker run --name my_cmssw_container -i -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
-          # Commands to run within the Docker container
-          # source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh 
-          source /opt/cms/cmsset_default.sh
           cd /workspace
           # Run your jobs here
-          "
-          cmsrel CMSSW_11_3_4
+          cmsrel CMSSW_11_3_4"
+          
+    - name : Set up HiggsCombine Tool
+      run: |
+        docker run --name my_cmssw_container -i -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
           cd CMSSW_11_3_4/src
           cmsenv
-          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit 
+          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
 
     - name: Cleanup
       run: docker rm my_cmssw_container
