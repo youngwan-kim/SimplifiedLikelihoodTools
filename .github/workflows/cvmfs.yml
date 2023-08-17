@@ -1,0 +1,28 @@
+name: cvmfs
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Pull CVMFS Docker image
+      run: docker pull cvmfs/services
+
+    - name: Set up CVMFS 
+      run: |
+        docker run -d --rm \
+          -e CVMFS_CLIENT_PROFILE=single \
+          -e CVMFS_REPOSITORIES=sft.cern.ch,... \
+          --cap-add SYS_ADMIN \
+          --device /dev/fuse \
+          --volume /cvmfs:/cvmfs:shared \
+          cvmfs/service
+
+    - name: Cleanup
+      run: docker stop
+
