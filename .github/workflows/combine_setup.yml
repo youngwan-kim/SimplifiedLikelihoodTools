@@ -16,10 +16,11 @@ jobs:
     - name: Set up CMSSW 
       run: |
         docker run --name my_cmssw_container -i -v /cvmfs:/workspace cmssw/cc7 /bin/bash -c "
-          source /cvmfs/cms.cern.ch/cmsset_default.sh 
+          ls -al /cvmfs/
+          #source /cvmfs/cms.cern.ch/cmsset_default.sh 
           cd /workspace
           # Run your jobs here
-          cmsrel CMSSW_11_3_4"
+          #cmsrel CMSSW_11_3_4"
           
     - name : Set up HiggsCombine Tool
       run: |
