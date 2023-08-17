@@ -15,7 +15,7 @@ jobs:
 
     - name: Set up CMSSW 
       run: |
-        docker run --name my_cmssw_container -i -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
+        docker run --name my_cmssw_container -i -v /cvmfs:/workspace cmssw/cc7 /bin/bash -c "
           source /cvmfs/cms.cern.ch/cmsset_default.sh 
           cd /workspace
           # Run your jobs here
@@ -23,7 +23,7 @@ jobs:
           
     - name : Set up HiggsCombine Tool
       run: |
-        docker run --name my_cmssw_container -i -v $PWD:/workspace cmssw/cc7 /bin/bash -c "
+        docker run --name my_cmssw_container -i cmssw/cc7 /bin/bash -c "
           cd CMSSW_11_3_4/src
           cmsenv
           git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
