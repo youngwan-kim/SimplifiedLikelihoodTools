@@ -1,0 +1,18 @@
+name: CMSSW container
+on: [push]
+
+jobs:
+  cmssw-cc7:
+    runs-on: ubuntu-latest
+    container: 
+      image: cmssw/cc7
+      volumes:
+        - /cvmfs:/workspace
+
+    services:
+      cvmfs:
+        image: cvmfs/service
+
+    steps:
+      - name: Check cvmfs mount
+        run: ls -al /cvmfs
