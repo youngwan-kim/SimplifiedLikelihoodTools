@@ -18,7 +18,7 @@ jobs:
       
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
-        docker run --name my_cmssw_container -i -v /cvmfs:/workspace cmssw/cc7 /bin/bash -c "
+        docker run --name my_cmssw_container -i -v /cvmfs:/cvmfs:shared cmssw/cc7 /bin/bash -c "
           ls -al /cvmfs/
           source /cvmfs/cms.cern.ch/cmsset_default.sh 
           cd /workspace
