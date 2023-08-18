@@ -1,0 +1,14 @@
+name: Minimal usage
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: cvmfs-contrib/github-action-cvmfs@v3.1
+    - name: Test CernVM-FS
+      run: |
+        ls /cvmfs/lhcb.cern.ch
+        ls /cvmfs/auger.egi.eu
+        ls /cvmfs/dune.opensciencegrid.org
+        ls /cvmfs/sw.hsf.org
+        ls /cvmfs/sft.cern.ch
