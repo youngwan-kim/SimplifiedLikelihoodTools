@@ -4,14 +4,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
     - uses: cvmfs-contrib/github-action-cvmfs@v3.1
+    
     - name: Test CernVM-FS
       run: |
-        ls /cvmfs/lhcb.cern.ch
-        ls /cvmfs/auger.egi.eu
-        ls /cvmfs/dune.opensciencegrid.org
-        ls /cvmfs/sw.hsf.org
-        ls /cvmfs/sft.cern.ch
+        ls /cvmfs/cms.cern.ch
 
     - name: Pull CMSSW Docker image
       run: docker pull cmssw/cc7
@@ -19,14 +19,37 @@ jobs:
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
         docker run --name my_cmssw_container -i -v /cvmfs:/cvmfs:shared cmssw/cc7 /bin/bash -c "
-          ls -al /cvmfs/
           source /cvmfs/cms.cern.ch/cmsset_default.sh 
-          cd /workspace
-          # Run your jobs here
-          cmsrel CMSSW_11_3_4
-          cd CMSSW_11_3_4/src
+          export SCRAM_ARCH=slc7_amd64_gcc530
+          cmsrel CMSSW_8_1_0
+          cd CMSSW_8_1_0/src
           cmsenv
           git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
           
+    - name: Compile HiggsCombine Tool
+      run: |
+        cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
+        git fetch origin
+        git checkout v7.0.13
+        scramv1 b clean; scramv1 b 
+
+    - name: Make workspace of datacards and run FitDiagnostics
+      run: |
+        ./RunCombine.sh
+
+    - name: Extract covariance from fit diagnostics
+      run: |
+        source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
+        python3 GetCovar.py
+
+    - name: Upload covariance matrix artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: covariance
+        path: |
+          "*.root"
+          "Rootfiles/*.root"
+          "output/*"
+
     - name: Cleanup
       run: docker rm my_cmssw_container
