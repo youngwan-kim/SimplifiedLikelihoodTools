@@ -27,7 +27,7 @@ jobs:
           
     - name: Compile HiggsCombine Tool
       run: |
-        docker exec -it my_cmssw_container "
+        docker exec -i my_cmssw_container "
         cd ~/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit
         git fetch origin
         git checkout v7.0.13
@@ -35,11 +35,11 @@ jobs:
 
     - name: Make workspace of datacards and run FitDiagnostics
       run: |
-        docker exec -it my_cmssw_container ./RunCombine.sh
+        docker exec -i my_cmssw_container ./RunCombine.sh
 
     - name: Extract covariance from fit diagnostics
       run: |
-        docker exec -it my_cmssw_container "
+        docker exec -i my_cmssw_container "
         source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
         python3 GetCovar.py "
 
