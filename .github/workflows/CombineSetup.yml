@@ -1,0 +1,32 @@
+name: CombineSetup
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: cvmfs-contrib/github-action-cvmfs@v3.1
+    - name: Test CernVM-FS
+      run: |
+        ls /cvmfs/lhcb.cern.ch
+        ls /cvmfs/auger.egi.eu
+        ls /cvmfs/dune.opensciencegrid.org
+        ls /cvmfs/sw.hsf.org
+        ls /cvmfs/sft.cern.ch
+
+    - name: Pull CMSSW Docker image
+      run: docker pull cmssw/cc7
+      
+    - name: Set up CMSSW and HiggsCombine Tool
+      run: |
+        docker run --name my_cmssw_container -i -v /cvmfs:/workspace cmssw/cc7 /bin/bash -c "
+          ls -al /cvmfs/
+          source /cvmfs/cms.cern.ch/cmsset_default.sh 
+          cd /workspace
+          # Run your jobs here
+          cmsrel CMSSW_11_3_4
+          cd CMSSW_11_3_4/src
+          cmsenv
+          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
+          
+    - name: Cleanup
+      run: docker rm my_cmssw_container
