@@ -3,11 +3,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: 
-      image: cmssw/cc7
-      volumes: 
-        - /cvmfs:/cvmfs:shared
-        
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -23,27 +18,31 @@ jobs:
       
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
-        source /cvmfs/cms.cern.ch/cmsset_default.sh 
-        cmsrel CMSSW_8_1_0
-        cd CMSSW_8_1_0/src
-        cmsenv
-        git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
+        docker run --name my_cmssw_container -d -v /cvmfs:/cvmfs:shared cmssw/cc7 /bin/bash -c "
+          source /cvmfs/cms.cern.ch/cmsset_default.sh 
+          export SCRAM_ARCH=slc7_amd64_gcc530
+          cmsrel CMSSW_8_1_0
+          cd CMSSW_8_1_0/src
+          cmsenv
+          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
           
     - name: Compile HiggsCombine Tool
       run: |
-        cd ~/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit
+        docker exec my_cmssw_container /bin/bash -c "
+        cd $CMSSW_BASE/src/HiggsAnalysis/CombinedLimit
         git fetch origin
         git checkout v7.0.13
-        scramv1 b clean; scramv1 b 
+        scramv1 b clean; scramv1 b "
 
     - name: Make workspace of datacards and run FitDiagnostics
       run: |
-        ./RunCombine.sh
+        docker exec my_cmssw_container /bin/bash -c ./RunCombine.sh
 
     - name: Extract covariance from fit diagnostics
       run: |
+        docker exec my_cmssw_container /bin/bash -c "
         source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
-        python3 GetCovar.py
+        python3 GetCovar.py"
 
     - name: Upload covariance matrix artifacts
       uses: actions/upload-artifact@v3

@@ -15,6 +15,7 @@ jobs:
       uses: actions/checkout@v3
     
     - name: Start container
+      run: docker pull cmssw/cc7
       run: docker run -d --name my_container cmssw/cc7
     
     - name: Set up CVMFS
