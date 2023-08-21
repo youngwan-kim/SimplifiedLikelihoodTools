@@ -3,6 +3,9 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: 
+      image: cmssw/cc7
+      volumes: /cvmfs:/cvmfs:shared
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -18,12 +21,11 @@ jobs:
       
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
-        docker run --name my_cmssw_container -i -v /cvmfs:/cvmfs:shared cmssw/cc7 /bin/bash -c "
-          source /cvmfs/cms.cern.ch/cmsset_default.sh 
-          cmsrel CMSSW_8_1_0
-          cd CMSSW_8_1_0/src
-          cmsenv
-          git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
+        source /cvmfs/cms.cern.ch/cmsset_default.sh 
+        cmsrel CMSSW_8_1_0
+        cd CMSSW_8_1_0/src
+        cmsenv
+        git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
           
     - name: Compile HiggsCombine Tool
       run: |
