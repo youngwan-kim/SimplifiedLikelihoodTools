@@ -1,49 +1,57 @@
-name: CombineSetup
-on: [push, pull_request]
+name: Run Container and Scripts
+
+on:
+  push:
+    branches:
+      - main  # Change this to your main branch name
+  pull_request:
+
 jobs:
-  build:
+  run_container_and_scripts:
     runs-on: ubuntu-latest
-    container: 
-      image: cmssw/cc7
-      volumes: 
-        - /cvmfs:/cvmfs:shared
-        
-    steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
-
-    - uses: cvmfs-contrib/github-action-cvmfs@v3.1
     
-    - name: Test CernVM-FS
-      run: |
-        ls /cvmfs/cms.cern.ch
-
-    - name: Pull CMSSW Docker image
-      run: docker pull cmssw/cc7
-      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Start container
+      run: docker run -d --name my_container cmssw/cc7
+    
+    - name: Set up CVMFS
+      uses: cvmfs-contrib/github-action-cvmfs@v3.1
+      with:
+        cvmfs_repositories: cms.cern.ch
+    
+    - name: Mount CVMFS
+      run: docker exec my_container mount -t cvmfs cms.cern.ch /cvmfs/cms.cern.ch
+    
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
+        docker exec my_container /bin/bash -c "
         source /cvmfs/cms.cern.ch/cmsset_default.sh 
         cmsrel CMSSW_8_1_0
         cd CMSSW_8_1_0/src
         cmsenv
         git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit "
           
+
     - name: Compile HiggsCombine Tool
       run: |
+        docker exec my_container /bin/bash -c "
         cd ~/CMSSW_8_1_0/src/HiggsAnalysis/CombinedLimit
         git fetch origin
         git checkout v7.0.13
-        scramv1 b clean; scramv1 b 
+        scramv1 b clean; scramv1 b "
 
     - name: Make workspace of datacards and run FitDiagnostics
       run: |
-        ./RunCombine.sh
-
+        docker exec my_container /bin/bash -c "cd /github/workspace && ./RunCombine.sh"
+    
     - name: Extract covariance from fit diagnostics
       run: |
+        docker exec my_container /bin/bash -c "
         source /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
-        python3 GetCovar.py
+        python3 GetCovar.py"
 
     - name: Upload covariance matrix artifacts
       uses: actions/upload-artifact@v3
@@ -54,5 +62,5 @@ jobs:
           "Rootfiles/*.root"
           "output/*"
 
-    - name: Cleanup
-      run: docker rm my_cmssw_container
+    - name: Stop and remove container
+      run: docker stop my_container && docker rm my_container
