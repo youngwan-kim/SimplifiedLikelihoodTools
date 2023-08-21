@@ -3,10 +3,6 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: 
-      image: cmssw/cc7
-      volumes: 
-        - /cvmfs:/cvmfs:shared
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -17,8 +13,12 @@ jobs:
       run: |
         ls /cvmfs/cms.cern.ch
 
-    - name: Pull CMSSW Docker image
-      run: docker pull cmssw/cc7
+    container: 
+      image: cmssw/cc7
+      volumes: 
+        - /cvmfs:/cvmfs:shared
+   # - name: Pull CMSSW Docker image
+   #   run: docker pull cmssw/cc7
       
     - name: Set up CMSSW and HiggsCombine Tool
       run: |
